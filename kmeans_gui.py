@@ -865,7 +865,7 @@ def create_gui():
     
     # Export buttons frame
     export_frame = ttk.LabelFrame(main_frame, text='Exportar Resultados', padding="10")
-    export_frame.grid(row=5, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=(10, 5), ipadx=5, ipady=5)
+    export_frame.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=(10, 5), ipadx=5, ipady=5)
     
     export_csv_btn = ttk.Button(export_frame, text='📊 CSV', width=15,
                                command=lambda: export_results())
@@ -888,16 +888,16 @@ def create_gui():
     ToolTip(export_plots_btn, 'Exportar gráficos a PNG')
     
     # Separator
-    ttk.Separator(main_frame, orient='horizontal').grid(row=6, column=0, columnspan=2, 
+    ttk.Separator(main_frame, orient='horizontal').grid(row=7, column=0, columnspan=2, 
                                                          sticky=(tk.W, tk.E), pady=10)
     
     # Results section
     results_label = ttk.Label(main_frame, text='Resultados', font=('Helvetica', 12, 'bold'))
-    results_label.grid(row=7, column=0, columnspan=2, sticky=tk.W, pady=(10, 5))
+    results_label.grid(row=8, column=0, columnspan=2, sticky=tk.W, pady=(10, 5))
     
     # Left column - Metrics and Log
     left_frame = ttk.Frame(main_frame)
-    left_frame.grid(row=8, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5)
+    left_frame.grid(row=9, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5)
     
     metrics_label = ttk.Label(left_frame, text='Métricas:', font=('Helvetica', 11, 'bold'))
     metrics_label.grid(row=0, column=0, sticky=tk.W)
@@ -918,7 +918,7 @@ def create_gui():
     
     # Right column - Plots (separated)
     right_frame = ttk.Frame(main_frame)
-    right_frame.grid(row=8, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5)
+    right_frame.grid(row=9, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5)
     
     # Create scrollable frame for plots
     plots_canvas = tk.Canvas(right_frame, bg='white')
