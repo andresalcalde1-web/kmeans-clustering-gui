@@ -56,11 +56,16 @@ python kmeans_gui.py
 
 1. **Configuración**: Selecciona el número de clusters, opciones de escalado y detección de outliers
 2. **Ejecutar análisis**: Haz clic en "Ejecutar Análisis" para procesar los datos
-3. **Visualizar resultados**: 
+3. **Exportar resultados**: Después del análisis, puedes guardar:
+   - **📊 CSV**: Resultados del clustering con asignación de clusters
+   - **📈 Métricas**: Configuración y métricas de calidad en archivo TXT
+   - **📝 Log**: Log completo del análisis en archivo TXT
+   - **🖼️ Gráficos**: Las tres gráficas generadas en formato PNG
+4. **Visualizar resultados**: 
    - Revisa las métricas en el panel izquierdo
    - Explora las gráficas en el panel derecho
    - Haz clic en cualquier gráfica o usa el botón "🔍 Ampliar" para verla en tamaño completo
-4. **Información**: Usa el botón "ℹ️ Información" para ver descripciones detalladas de los métodos
+5. **Información**: Usa el botón "ℹ️ Información" para ver descripciones detalladas de los métodos
 
 ## 🎯 Características principales
 
@@ -107,6 +112,33 @@ El script es completamente portable:
 - ✅ No usa rutas absolutas
 - ✅ Funciona en Windows, Mac y Linux
 - ✅ Solo necesita las bibliotecas instaladas
+
+## 💾 Exportación de Resultados
+
+Después de ejecutar un análisis, puedes exportar los resultados de varias formas:
+
+### Exportar a CSV
+Guarda los resultados del clustering en un archivo CSV con:
+- Índice original de los puntos
+- Clase verdadera (si disponible)
+- Cluster asignado por el algoritmo
+- Validación de si la asignación es correcta
+
+### Exportar Métricas
+Guarda un informe completo en TXT incluyendo:
+- Configuración utilizada (K, método de inicialización, etc.)
+- Todas las métricas de calidad calculadas
+- Distribución de puntos por cluster
+- Información de outliers
+
+### Exportar Log
+Guarda el log completo del análisis con todos los pasos realizados y información detallada del proceso.
+
+### Exportar Gráficos
+Descarga las tres gráficas generadas en formato PNG:
+- Gráfica de clustering con centroides
+- Método del codo (inercia vs K)
+- Gráfica de Silhouette Score o detección de outliers
 
 ## 📚 Dependencias
 

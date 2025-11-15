@@ -376,6 +376,96 @@ def run_kmeans_analysis(config, output_text):
     
     return results
 
+def export_results_csv(results, filepath):
+    """Exporta los resultados del clustering a un archivo CSV."""
+    try:
+        # Crear dataframe con resultados
+        export_data = {
+            'Índice Original': original_indices,
+            'Clase Verdadera': true_labels,
+            'Cluster Asignado': results['labels'] + 1,  # +1 para empezar desde 1
+            'Correcto': ['Sí' if results['labels'][i] == (true_labels[i] - 1) else 'No' 
+                        for i in range(len(results['labels']))]
+        }
+        
+        df = pd.DataFrame(export_data)
+        df.to_csv(filepath, index=False, encoding='utf-8')
+        return True, f"Resultados exportados a: {filepath}"
+    except Exception as e:
+        return False, f"Error al exportar CSV: {str(e)}"
+
+def export_metrics_txt(results, filepath):
+    """Exporta las métricas del análisis a un archivo de texto."""
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write("=" * 80 + "\n")
+            f.write("REPORTE DE ANÁLISIS K-MEANS CLUSTERING\n")
+            f.write("=" * 80 + "\n\n")
+            
+            # Configuración
+            f.write("CONFIGURACIÓN UTILIZADA:\n")
+            f.write("-" * 80 + "\n")
+            f.write(f"K clusters: {results['config']['K']}\n")
+            f.write(f"Método de inicialización: {results['config']['init_method']}\n")
+            f.write(f"Datos escalados: {'Sí' if results['config']['scale_data'] else 'No'}\n")
+            f.write(f"Detección de outliers: {'Sí' if results['config']['detect_outliers'] else 'No'}\n")
+            f.write(f"Seed (random_state): {results['config']['random_state']}\n\n")
+            
+            # Métricas
+            f.write("MÉTRICAS DE CALIDAD:\n")
+            f.write("-" * 80 + "\n")
+            f.write(f"Silhouette Score: {results['metrics']['silhouette']:.6f}\n")
+            f.write(f"Davies-Bouldin Index: {results['metrics']['davies_bouldin']:.6f}\n")
+            f.write(f"Calinski-Harabasz Index: {results['metrics']['calinski']:.6f}\n")
+            f.write(f"Inertia: {results['metrics']['inertia']:.6f}\n")
+            if results['metrics']['accuracy'] is not None:
+                f.write(f"Accuracy (vs clases verdaderas): {results['metrics']['accuracy']:.2f}%\n")
+            f.write(f"\n")
+            
+            # Estadísticas
+            f.write("ESTADÍSTICAS:\n")
+            f.write("-" * 80 + "\n")
+            unique_labels, counts = np.unique(results['labels'], return_counts=True)
+            f.write(f"Total de puntos: {len(results['labels'])}\n")
+            f.write(f"Outliers detectados: {results['n_outliers']}\n\n")
+            
+            f.write("Distribución por cluster:\n")
+            for label, count in zip(unique_labels, counts):
+                f.write(f"  Cluster {label + 1}: {count} puntos ({count/len(results['labels'])*100:.1f}%)\n")
+            
+        return True, f"Métricas exportadas a: {filepath}"
+    except Exception as e:
+        return False, f"Error al exportar métricas: {str(e)}"
+
+def export_log_txt(log_messages, filepath):
+    """Exporta el log del análisis a un archivo de texto."""
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write("LOG DE ANÁLISIS K-MEANS CLUSTERING\n")
+            f.write("=" * 80 + "\n\n")
+            for msg in log_messages:
+                f.write(msg + "\n")
+        return True, f"Log exportado a: {filepath}"
+    except Exception as e:
+        return False, f"Error al exportar log: {str(e)}"
+
+def export_plots(plots_dict, output_dir):
+    """Exporta los gráficos a archivos PNG."""
+    try:
+        import os
+        os.makedirs(output_dir, exist_ok=True)
+        
+        saved_plots = []
+        for plot_name, plot_data in plots_dict.items():
+            filepath = os.path.join(output_dir, f"{plot_name}.png")
+            with open(filepath, 'wb') as f:
+                f.write(plot_data)
+            saved_plots.append(f"  ✓ {plot_name}.png")
+        
+        return True, f"Gráficos exportados a: {output_dir}\n" + "\n".join(saved_plots)
+    except Exception as e:
+        return False, f"Error al exportar gráficos: {str(e)}"
+
 def create_plots(results):
     """Crea los gráficos separados y los convierte a imágenes para la GUI."""
     cmap = plt.colormaps['tab10']
@@ -773,6 +863,30 @@ def create_gui():
                            command=lambda: run_analysis())
     run_button.grid(row=5, column=0, columnspan=2, pady=10)
     
+    # Export buttons frame
+    export_frame = ttk.LabelFrame(main_frame, text='Exportar Resultados', padding="10")
+    export_frame.grid(row=5, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=(10, 5), ipadx=5, ipady=5)
+    
+    export_csv_btn = ttk.Button(export_frame, text='📊 CSV', width=15,
+                               command=lambda: export_results())
+    export_csv_btn.pack(side=tk.LEFT, padx=5)
+    ToolTip(export_csv_btn, 'Exportar resultados del clustering a CSV')
+    
+    export_metrics_btn = ttk.Button(export_frame, text='📈 Métricas', width=15,
+                                   command=lambda: export_metrics())
+    export_metrics_btn.pack(side=tk.LEFT, padx=5)
+    ToolTip(export_metrics_btn, 'Exportar métricas y configuración a TXT')
+    
+    export_log_btn = ttk.Button(export_frame, text='📝 Log', width=15,
+                               command=lambda: export_log())
+    export_log_btn.pack(side=tk.LEFT, padx=5)
+    ToolTip(export_log_btn, 'Exportar log del análisis a TXT')
+    
+    export_plots_btn = ttk.Button(export_frame, text='🖼️ Gráficos', width=15,
+                                 command=lambda: export_plots_func())
+    export_plots_btn.pack(side=tk.LEFT, padx=5)
+    ToolTip(export_plots_btn, 'Exportar gráficos a PNG')
+    
     # Separator
     ttk.Separator(main_frame, orient='horizontal').grid(row=6, column=0, columnspan=2, 
                                                          sticky=(tk.W, tk.E), pady=10)
@@ -941,6 +1055,85 @@ def create_gui():
         ttk.Button(zoom_window, text="Cerrar", command=zoom_window.destroy).pack(pady=5)
     
     # Store references for the run_analysis function
+    last_results = [None]  # Para almacenar los últimos resultados
+    last_plots = [None]  # Para almacenar los últimos gráficos
+    
+    def export_results():
+        """Exporta resultados a CSV"""
+        if last_results[0] is None:
+            messagebox.showwarning('Advertencia', 'Ejecute un análisis primero')
+            return
+        
+        from tkinter import filedialog
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+            initialfile="clustering_results.csv"
+        )
+        
+        if filepath:
+            success, msg = export_results_csv(last_results[0], filepath)
+            if success:
+                messagebox.showinfo('Éxito', msg)
+            else:
+                messagebox.showerror('Error', msg)
+    
+    def export_metrics():
+        """Exporta métricas a TXT"""
+        if last_results[0] is None:
+            messagebox.showwarning('Advertencia', 'Ejecute un análisis primero')
+            return
+        
+        from tkinter import filedialog
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            initialfile="clustering_metrics.txt"
+        )
+        
+        if filepath:
+            success, msg = export_metrics_txt(last_results[0], filepath)
+            if success:
+                messagebox.showinfo('Éxito', msg)
+            else:
+                messagebox.showerror('Error', msg)
+    
+    def export_log():
+        """Exporta log a TXT"""
+        if last_results[0] is None:
+            messagebox.showwarning('Advertencia', 'Ejecute un análisis primero')
+            return
+        
+        from tkinter import filedialog
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            initialfile="clustering_log.txt"
+        )
+        
+        if filepath:
+            success, msg = export_log_txt(last_results[0]['log_messages'], filepath)
+            if success:
+                messagebox.showinfo('Éxito', msg)
+            else:
+                messagebox.showerror('Error', msg)
+    
+    def export_plots_func():
+        """Exporta gráficos a PNG"""
+        if last_plots[0] is None:
+            messagebox.showwarning('Advertencia', 'Ejecute un análisis primero')
+            return
+        
+        from tkinter import filedialog
+        dirpath = filedialog.askdirectory(title="Seleccionar directorio para guardar gráficos")
+        
+        if dirpath:
+            success, msg = export_plots(last_plots[0], dirpath)
+            if success:
+                messagebox.showinfo('Éxito', msg)
+            else:
+                messagebox.showerror('Error', msg)
+    
     def run_analysis():
         nonlocal original_plots_data
         try:
@@ -1011,6 +1204,10 @@ def create_gui():
             
             # Save original images for zoom
             original_plots_data = plots_dict.copy()
+            
+            # Guardar resultados para exportación
+            last_results[0] = results
+            last_plots[0] = plots_dict
             
             # Display each plot in its canvas
             plot_canvases = {
